@@ -1,0 +1,9 @@
+body{
+    background-color: #131426;
+}
+/* Header */
+.dropdown-toggle::after {
+    display: none !important;
+  }
+  
+/* sidebar */
