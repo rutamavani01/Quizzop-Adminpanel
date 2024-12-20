@@ -1,9 +1,23 @@
-body{
-    background-color: #131426;
+body {
+  background-color: #131426;
 }
+
 /* Header */
 .dropdown-toggle::after {
-    display: none !important;
-  }
-  
+  display: none !important;
+}
+
 /* sidebar */
+
+/* Responsive styles for smaller screens */
+@media only screen and (max-width: 950px) {
+  .card-login {
+    width: 85%;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .card-login {
+    width: 90%;
+  }
+}

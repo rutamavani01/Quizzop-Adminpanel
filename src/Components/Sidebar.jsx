@@ -98,7 +98,7 @@ const Sidebar = () => {
                     >
                         <div>
                             <i className="bi bi-file-text me-2"></i>
-                            Forms
+                            Quiz
                         </div>
                         <div>
                             <span className="badge bg-info rounded-pill me-2">9</span>
@@ -106,7 +106,7 @@ const Sidebar = () => {
                         </div>
                     </a>
                     <div className={`ms-3 ${openMenus.forms ? 'show' : 'd-none'}`}>
-                        <a href="#" className="nav-link text-secondary">Form Elements</a>
+                        <a href="/quiz" className="nav-link text-secondary">Quiz</a>
                         <a href="#" className="nav-link text-secondary">Form Validation</a>
                         <a href="#" className="nav-link text-secondary">Form Advanced</a>
                         <a href="#" className="nav-link text-secondary">Form Editors</a>
@@ -128,12 +128,12 @@ const Sidebar = () => {
                     >
                         <div>
                             <i className="bi bi-graph-up me-2"></i>
-                            Charts
+                            Setting
                         </div>
                         <i className={`bi bi-chevron-${openMenus.charts ? 'down' : 'right'} ms-2`}></i>
                     </a>
                     <div className={`ms-3 ${openMenus.charts ? 'show' : 'd-none'}`}>
-                        <a href="#" className="nav-link text-secondary">Line Charts</a>
+                        <a href="/setting" className="nav-link text-secondary">Setting</a>
                         <a href="#" className="nav-link text-secondary">Bar Charts</a>
                         <a href="#" className="nav-link text-secondary">Area Charts</a>
                     </div>
