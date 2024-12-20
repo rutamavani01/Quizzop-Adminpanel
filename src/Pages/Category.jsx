@@ -189,7 +189,9 @@ const Category = () => {
           </button>
         </div>
       </div>
-      <Viewcategory categories={categories} /> {/* Pass categories to Viewcategory */}
+
+      <Viewcategory categories={categories} />
+
     </div>
   );
 };

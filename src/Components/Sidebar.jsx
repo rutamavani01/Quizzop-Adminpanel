@@ -19,9 +19,9 @@ const Sidebar = () => {
     };
 
     return (
-        <div className="sidebar text-light">
-            <div className="mb-4">
-                <img src="./images/quizzop-logo-dark.svg" alt="quizzop logo" className="img-fluid w-50" />
+        <div className="sidebar text-light p-3">
+            <div className="mb-4 p-3">
+                <img src="/images/quizzop-logo-dark.svg" alt="quizzop logo" className="img-fluid w-50" />
             </div>
 
             <nav className="nav flex-column">

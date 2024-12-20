@@ -28,7 +28,7 @@ function Setting() {
 
     return (
         <div className='p-4'>
-            <div className='col-12 p-4 d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+            <div className='col-12 d-flex flex-wrap px-4 py-2' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
                 <Card style={{ backgroundColor: 'transparent', border: 'none', width: '100%' }}>
                     <CardBody className='p-0'>
                         <CardTitle style={{ fontSize: '17px' }} className="fw-bold text-white">Logo</CardTitle>
@@ -84,12 +84,12 @@ function Setting() {
                 </Card>
             </div>
 
-            <div className='col-12 p-4 d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+            <div className='col-12 px-4 py-2 d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
                 <p className='fw-bold mb-2' style={{ fontSize: '17px' }} id="example-color-input">Background Color  </p>
                 <input
                     className="form-control form-control-color w-100"
                     type="color"
-                    defaultValue="#02a499"
+                    defaultValue="#191a32"
                     id="example-color-input"
                     style={{
                         border: '1px solid #6063af',
@@ -98,14 +98,12 @@ function Setting() {
                         width: '100%', fontSize: '15px', color: 'white',
                     }}
                 />
-            </div>
 
-            <div className='col-12 p-4 d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
-                <p className='fw-bold mb-2' style={{ fontSize: '17px' }} id="example-color-input">Button Color  </p>
+                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input">Card Color  </p>
                 <input
                     className="form-control form-control-color w-100"
                     type="color"
-                    defaultValue="#33DD27"
+                    defaultValue="#26284c"
                     id="example-color-input"
                     style={{
                         border: '1px solid #6063af',
@@ -114,14 +112,117 @@ function Setting() {
                         width: '100%', fontSize: '15px', color: 'white',
                     }}
                 />
+
+                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input">Border Color  </p>
+                <input
+                    className="form-control form-control-color w-100"
+                    type="color"
+                    defaultValue="#282a4f"
+                    id="example-color-input"
+                    style={{
+                        border: '1px solid #6063af',
+                        backgroundColor: 'transparent',
+                        borderRadius: '5px',
+                        width: '100%', fontSize: '15px', color: 'white',
+                    }}
+                />
+
+                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input">Headin Text  </p>
+                <input
+                    className="form-control form-control-color w-100"
+                    type="color"
+                    defaultValue="#ffffff"
+                    id="example-color-input"
+                    style={{
+                        border: '1px solid #6063af',
+                        backgroundColor: 'transparent',
+                        borderRadius: '5px',
+                        width: '100%', fontSize: '15px', color: 'white',
+                    }}
+                />
+
+                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> Text  </p>
+                <input
+                    className="form-control form-control-color w-100"
+                    type="color"
+                    defaultValue="#8789c3"
+                    id="example-color-input"
+                    style={{
+                        border: '1px solid #6063af',
+                        backgroundColor: 'transparent',
+                        borderRadius: '5px',
+                        width: '100%', fontSize: '15px', color: 'white',
+                    }}
+                />
+
+                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> Title button  </p>
+                <input
+                    className="form-control form-control-color w-100"
+                    type="color"
+                    defaultValue="#FFD2A0"
+                    id="example-color-input"
+                    style={{
+                        border: '1px solid #6063af',
+                        backgroundColor: 'transparent',
+                        borderRadius: '5px',
+                        width: '100%', fontSize: '15px', color: 'white',
+                    }}
+                />
+
+                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> Currect Answer button  </p>
+                <input
+                    className="form-control form-control-color w-100"
+                    type="color"
+                    defaultValue="#008000"
+                    id="example-color-input"
+                    style={{
+                        border: '1px solid #6063af',
+                        backgroundColor: 'transparent',
+                        borderRadius: '5px',
+                        width: '100%', fontSize: '15px', color: 'white',
+                    }}
+                />
+
+                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> Wrong Answer button  </p>
+                <input
+                    className="form-control form-control-color w-100"
+                    type="color"
+                    defaultValue="#FF0000"
+                    id="example-color-input"
+                    style={{
+                        border: '1px solid #6063af',
+                        backgroundColor: 'transparent',
+                        borderRadius: '5px',
+                        width: '100%', fontSize: '15px', color: 'white',
+                    }}
+                />
+
+                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> login button  </p>
+                <input
+                    className="form-control form-control-color w-100"
+                    type="color"
+                    defaultValue="green"
+                    id="example-color-input"
+                    style={{
+                        border: '1px solid #6063af',
+                        backgroundColor: 'transparent',
+                        borderRadius: '5px',
+                        width: '100%', fontSize: '15px', color: 'white',
+                    }}
+                />
+
+                <button type="button" style={{ backgroundColor: '#404380' }} className="btn text-white px-5  waves-effect waves-light text-center d-flex justify-content-start  mt-5">Submit</button>
+
             </div>
 
-            <button
-                type="button" style={{ backgroundColor: '#404380' }}
-                className="btn text-white px-5 waves-effect waves-light text-center d-flex justify-content-start  mt-3"
-            >
-                Submit
-            </button>
+            {/* <div className='col-12  px-4 py-2  d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+
+                <button
+                    type="button" style={{ backgroundColor: '#404380' }}
+                    className="btn text-white px-5  waves-effect waves-light text-center d-flex justify-content-start  mt-5"
+                >Submit</button>
+
+            </div> */}
 
         </div>
     )
