@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ViewQuiz from './ViewQuiz';
 
 function Quiz() {
   const [categories, setCategories] = useState([]);
@@ -30,15 +31,11 @@ function Quiz() {
       alert("Please select a category");
       return;
     }
-    // Get existing quizzes or initialize empty array
     const existingQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    // Add new quiz
     existingQuizzes.push(quizData);
-    // Save back to localStorage
     localStorage.setItem('quizzes', JSON.stringify(existingQuizzes));
 
     alert("Quiz added successfully!");
-    // Reset form
     setQuizData({
       categoryName: "",
       question: "",
@@ -59,7 +56,7 @@ function Quiz() {
             name="categoryName"
             value={quizData.categoryName}
             onChange={handleInputChange}
-            className='py-2'
+            className='p-2'
             style={{
               border: '1px solid #6063af',
               backgroundColor: 'transparent',
@@ -69,9 +66,9 @@ function Quiz() {
               color: 'white',
             }}
           >
-            <option value="">Select Category</option>
+            <option value="" style={{  backgroundColor: '#191a32',}}>Select Category</option>
             {categories.map((category, index) => (
-              <option key={index} value={category.name}>
+              <option key={index} value={category.name} style={{  backgroundColor: '#191a32 ',}}>
                 {category.name}
               </option>
             ))}
@@ -179,7 +176,7 @@ function Quiz() {
             name="correctAnswer"
             value={quizData.correctAnswer}
             onChange={handleInputChange}
-            className='py-2'
+            className='p-2'
             style={{
               border: '1px solid #6063af',
               backgroundColor: 'transparent',
@@ -189,11 +186,11 @@ function Quiz() {
               color: 'white',
             }}
           >
-            <option value="">Select Correct Answer</option>
-            <option value="optionA">A</option>
-            <option value="optionB">B</option>
-            <option value="optionC">C</option>
-            <option value="optionD">D</option>
+            <option value="" className='p-1' style={{  backgroundColor: '#191a32 ',}}>Select Correct Answer</option>
+            <option value="optionA" style={{  backgroundColor: '#191a32 ',}}>A</option>
+            <option value="optionB" style={{  backgroundColor: '#191a32 ',}}>B</option>
+            <option value="optionC" style={{  backgroundColor: '#191a32 ',}}>C</option>
+            <option value="optionD" style={{  backgroundColor: '#191a32 ',}}>D</option>
           </select>
         </div>
 
@@ -208,6 +205,7 @@ function Quiz() {
           </button>
         </div>
       </div>
+        <ViewQuiz/>
     </div>
   );
 }

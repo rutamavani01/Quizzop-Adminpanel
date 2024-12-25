@@ -2,32 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, CardBody, CardTitle } from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import Viewcategory from './Viewcategory';
+import { addCategory } from '../Conf/Api';
 
 const Category = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [categoryName, setCategoryName] = useState("");
+  const [categoryDesc, setCategoryDesc] = useState("");
   const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    const existingData = JSON.parse(localStorage.getItem("categories")) || [];
-    setCategories(existingData);
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   function handleAcceptedFiles(files) {
     const file = files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result;
-        setSelectedFile({
-          name: file.name,
-          preview: URL.createObjectURL(file),
-          base64: base64String,
-          formattedSize: formatBytes(file.size),
-        });
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      alert('No file selected.');
+      return;
     }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file.');
+      return;
+    }
+
+    // Validate file size (e.g., 5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size should be less than 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result;
+      setSelectedFile({
+        name: file.name,
+        preview: URL.createObjectURL(file),
+        base64: base64String,
+        formattedSize: formatBytes(file.size),
+      });
+    };
+    reader.readAsDataURL(file);
   }
 
   function formatBytes(bytes, decimals = 2) {
@@ -39,34 +52,54 @@ const Category = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   }
 
-  const handleSubmit = () => {
-    if (!categoryName.trim()) {
-      alert("Please enter a category name.");
-      return;
+  const handleSubmit = async () => {
+    try {
+      // Validate inputs
+      if (!categoryName.trim()) {
+        alert('Please enter a category name.');
+        return;
+      }
+      if (!categoryDesc.trim()) {
+        alert('Please enter a category description.');
+        return;
+      }
+      if (!selectedFile) {
+        alert('Please upload a category image.');
+        return;
+      }
+
+      setIsLoading(true);
+
+      const categoryData = {
+        name: categoryName,
+        description: categoryDesc,
+        endtime: "22:59:48",
+        playcoin: 200,
+        wincoin: 100,
+        image: selectedFile.base64
+      };
+
+      const response = await addCategory(categoryData);
+
+      if (response.success) {
+        // Add new category to state
+        setCategories(prev => [...prev, response.data]);
+
+        // Reset form
+        setCategoryName('');
+        setCategoryDesc('');
+        setSelectedFile(null);
+
+        alert('Category added successfully!');
+      } else {
+        throw new Error(response.message || 'Failed to add category');
+      }
+    } catch (error) {
+      alert(error.message || 'Failed to add category. Please try again.');
+      console.error('Error adding category:', error);
+    } finally {
+      setIsLoading(false);
     }
-
-    if (!selectedFile) {
-      alert("Please upload a category image.");
-      return;
-    }
-
-    const categoryData = {
-      name: categoryName,
-      image: {
-        name: selectedFile.name,
-        base64: selectedFile.base64,
-        formattedSize: selectedFile.formattedSize,
-      },
-    };
-
-    // Save to localStorage and update state
-    const updatedCategories = [...categories, categoryData];
-    setCategories(updatedCategories); // Update state to trigger re-render
-    localStorage.setItem("categories", JSON.stringify(updatedCategories));
-
-    alert("Category added successfully!");
-    setCategoryName("");
-    setSelectedFile(null);
   };
 
   return (
@@ -80,10 +113,9 @@ const Category = () => {
           color: "white",
           width: "100%",
           borderRadius: "5px",
-        }}
-      >
+        }}>
         <div className="text-white">
-          <p className="fw-bold mb-2" style={{ fontSize: "17px" }}>
+          <p className=" mb-2" style={{ fontSize: "17px" }}>
             Category Name
           </p>
           <input
@@ -102,21 +134,35 @@ const Category = () => {
           />
         </div>
 
+        <div className="text-white mt-4">
+          <p className=" mb-2" style={{ fontSize: "17px" }}>
+            Category Description
+          </p>
+          <textarea
+            type="text"
+            className="py-2"
+            style={{
+              border: "1px solid #6063af",
+              backgroundColor: "transparent",
+              borderRadius: "5px",
+              width: "100%",
+              fontSize: "15px",
+              color: "white",
+            }}
+            value={categoryDesc}
+            onChange={(e) => setCategoryDesc(e.target.value)}
+          />
+        </div>
+
         <div className="mt-4">
           <Card style={{ backgroundColor: "transparent", border: "none" }}>
             <CardBody className="p-0">
-              <CardTitle
-                style={{ fontSize: "17px" }}
-                className="fw-bold text-white"
-              >
+              <CardTitle style={{ fontSize: "17px" }} className=" text-white">
                 Category Image
               </CardTitle>
               <div className="mb-5 m-auto">
                 <Form className="text-center text-white">
-                  <Dropzone
-                    onDrop={(acceptedFiles) => handleAcceptedFiles(acceptedFiles)}
-                    maxFiles={1}
-                  >
+                  <Dropzone onDrop={(acceptedFiles) => handleAcceptedFiles(acceptedFiles)} maxFiles={1}>
                     {({ getRootProps, getInputProps }) => (
                       <div
                         className="dropzone"
@@ -124,12 +170,8 @@ const Category = () => {
                           border: "2px dotted #6063af",
                           padding: "50px",
                           borderRadius: "5px",
-                        }}
-                      >
-                        <div
-                          className="dz-message needsclick"
-                          {...getRootProps()}
-                        >
+                        }}>
+                        <div className="dz-message needsclick" {...getRootProps()}>
                           <input {...getInputProps()} />
                           <div className="mb-1">
                             <i className="bi bi-cloud-arrow-up  display-4  text-white"></i>
@@ -140,17 +182,13 @@ const Category = () => {
                     )}
                   </Dropzone>
                   {selectedFile && (
-                    <div
-                      className="dropzone-previews mt-3"
-                      id="file-previews"
-                    >
+                    <div className="dropzone-previews mt-3" id="file-previews">
                       <Card
                         className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
                         style={{
                           backgroundColor: "transparent",
                           border: "none",
-                        }}
-                      >
+                        }}>
                         <div className="p-2">
                           <Row className="align-items-center">
                             <Col className="col-auto">
@@ -163,9 +201,7 @@ const Category = () => {
                               />
                             </Col>
                             <Col className="text-start">
-                              <p className="text-white font-weight-bold">
-                                {selectedFile.name}
-                              </p>
+                              <p className="text-white font-weight-bold">{selectedFile.name}</p>
                               <p className="mb-0 text-white">
                                 <strong>{selectedFile.formattedSize}</strong>
                               </p>
@@ -179,19 +215,21 @@ const Category = () => {
               </div>
             </CardBody>
           </Card>
+
           <button
             type="button"
             style={{ backgroundColor: "#404380" }}
             className="btn text-white px-5 waves-effect waves-light text-center d-flex justify-content-start mt-3"
             onClick={handleSubmit}
+            disabled={isLoading}
           >
-            Submit
+            {isLoading ? 'Adding...' : 'Submit'}
           </button>
+          
         </div>
       </div>
 
-      <Viewcategory categories={categories} />
-
+      <Viewcategory categories={categories} setCategories={setCategories} />
     </div>
   );
 };

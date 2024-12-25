@@ -1,19 +1,38 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, CardBody, CardTitle } from 'reactstrap';
 import Dropzone from 'react-dropzone';
-import { useState } from 'react';
+import ViewSetting from './ViewSetting';
 
 function Setting() {
-    const [selectedFiles, setselectedFiles] = useState([]);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [colorSettings, setColorSettings] = useState({
+        backgroundColor: '#191a32',
+        cardColor: '#26284c',
+        borderColor: '#282a4f',
+        headingTextColor: '#ffffff',
+        textColor: '#8789c3',
+        titleButtonColor: '#FFD2A0',
+        correctAnswerButtonColor: '#008000',
+        wrongAnswerButtonColor: '#FF0000',
+        loginButtonColor: 'green',
+    });
+    const [settingsList, setSettingsList] = useState([]);
+    const [title, setTitle] = useState("");  // State for the title input
+
+    useEffect(() => {
+        const savedSettingsList = JSON.parse(localStorage.getItem('settingsList')) || [];
+        setSettingsList(savedSettingsList);
+    }, []);
 
     function handleAcceptedFiles(files) {
-        files.map(file =>
-            Object.assign(file, {
+        if (files.length > 0) {
+            const file = files[0];
+            const updatedFile = Object.assign(file, {
                 preview: URL.createObjectURL(file),
                 formattedSize: formatBytes(file.size),
-            })
-        );
-        setselectedFiles(files);
+            });
+            setSelectedFiles([updatedFile]);
+        }
     }
 
     function formatBytes(bytes, decimals = 2) {
@@ -21,28 +40,71 @@ function Setting() {
         const k = 1024;
         const dm = decimals < 0 ? 0 : decimals;
         const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
     }
 
+    function handleColorChange(event, colorKey) {
+        setColorSettings({
+            ...colorSettings,
+            [colorKey]: event.target.value,
+        });
+    }
+
+    function handleSubmit() {
+        if (!selectedFiles.length || !title.trim()) {
+            alert('Please provide a title and upload a logo before submitting.');
+            return;
+        }
+
+        const newSetting = {
+            id: Date.now(),
+            title, 
+            colorSettings,
+            selectedFiles: selectedFiles.map(file => ({
+                name: file.name,
+                preview: file.preview,
+                size: file.formattedSize
+            })),
+            createdAt: new Date().toISOString()
+        };
+
+        const updatedSettingsList = [...settingsList, newSetting];
+        setSettingsList(updatedSettingsList);
+        localStorage.setItem('settingsList', JSON.stringify(updatedSettingsList));
+
+        alert('Settings saved successfully!');
+        setTitle(""); 
+        setColorSettings({
+            backgroundColor: '#191a32',
+            cardColor: '#26284c',
+            borderColor: '#282a4f',
+            headingTextColor: '#ffffff',
+            textColor: '#8789c3',
+            titleButtonColor: '#FFD2A0',
+            correctAnswerButtonColor: '#008000',
+            wrongAnswerButtonColor: '#FF0000',
+            loginButtonColor: 'green',
+        });
+        setSelectedFiles([]);
+    }
+
     return (
         <div className='p-4'>
-            <div className='col-12 d-flex flex-wrap px-4 py-2' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+            <h5 className="text-white mb-3">Setting Add</h5>
+            <div className='col-12 d-flex flex-wrap px-4 py-2' style={{ backgroundColor: 'transparent', color: 'white', width: '100%', borderRadius: '5px' }}>
                 <Card style={{ backgroundColor: 'transparent', border: 'none', width: '100%' }}>
                     <CardBody className='p-0'>
-                        <CardTitle style={{ fontSize: '17px' }} className="fw-bold text-white">Logo</CardTitle>
+                        <CardTitle style={{ fontSize: '17px' }} className="text-white">Logo</CardTitle>
                         <div className="mb-5 m-auto">
                             <Form className='text-center text-white'>
-                                <Dropzone
-                                    onDrop={acceptedFiles => handleAcceptedFiles(acceptedFiles)}
-                                >
+                                <Dropzone onDrop={acceptedFiles => handleAcceptedFiles(acceptedFiles)}>
                                     {({ getRootProps, getInputProps }) => (
-                                        <div className="dropzone" style={{ border: '2px dotted #6063af', padding: '50px', borderRadius: '5px' }}>
+                                        <div className="dropzone" style={{ border: `2px dotted ${colorSettings.borderColor}`, padding: '50px', borderRadius: '5px' }}>
                                             <div className="dz-message needsclick" {...getRootProps()}>
                                                 <input {...getInputProps()} />
                                                 <div className="mb-1">
-                                                    <i className="bi bi-cloud-arrow-up  display-4  text-white"></i>
+                                                    <i className="bi bi-cloud-arrow-up display-4 text-white"></i>
                                                 </div>
                                                 <h4>Drop files here or click to upload.</h4>
                                             </div>
@@ -84,148 +146,63 @@ function Setting() {
                 </Card>
             </div>
 
-            <div className='col-12 px-4 py-2 d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
-                <p className='fw-bold mb-2' style={{ fontSize: '17px' }} id="example-color-input">Background Color  </p>
+            <div className='col-12 px-4 py-2 ' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+                <p className='mb-2' style={{ fontSize: '17px' }}>Title</p>
                 <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="#191a32"
-                    id="example-color-input"
+                    className="form-control w-100"
+                    type="text"
+                    value={title}
+                    onChange={event => setTitle(event.target.value)}  // Bind input value to title state
                     style={{
                         border: '1px solid #6063af',
                         backgroundColor: 'transparent',
                         borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
+                        width: '100%',
+                        fontSize: '15px',
+                        color: 'white',
                     }}
                 />
-
-                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input">Card Color  </p>
-                <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="#26284c"
-                    id="example-color-input"
-                    style={{
-                        border: '1px solid #6063af',
-                        backgroundColor: 'transparent',
-                        borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
-                    }}
-                />
-
-                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input">Border Color  </p>
-                <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="#282a4f"
-                    id="example-color-input"
-                    style={{
-                        border: '1px solid #6063af',
-                        backgroundColor: 'transparent',
-                        borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
-                    }}
-                />
-
-                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input">Headin Text  </p>
-                <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="#ffffff"
-                    id="example-color-input"
-                    style={{
-                        border: '1px solid #6063af',
-                        backgroundColor: 'transparent',
-                        borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
-                    }}
-                />
-
-                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> Text  </p>
-                <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="#8789c3"
-                    id="example-color-input"
-                    style={{
-                        border: '1px solid #6063af',
-                        backgroundColor: 'transparent',
-                        borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
-                    }}
-                />
-
-                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> Title button  </p>
-                <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="#FFD2A0"
-                    id="example-color-input"
-                    style={{
-                        border: '1px solid #6063af',
-                        backgroundColor: 'transparent',
-                        borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
-                    }}
-                />
-
-                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> Currect Answer button  </p>
-                <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="#008000"
-                    id="example-color-input"
-                    style={{
-                        border: '1px solid #6063af',
-                        backgroundColor: 'transparent',
-                        borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
-                    }}
-                />
-
-                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> Wrong Answer button  </p>
-                <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="#FF0000"
-                    id="example-color-input"
-                    style={{
-                        border: '1px solid #6063af',
-                        backgroundColor: 'transparent',
-                        borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
-                    }}
-                />
-
-                <p className='fw-bold mb-2 mt-4' style={{ fontSize: '17px' }} id="example-color-input"> login button  </p>
-                <input
-                    className="form-control form-control-color w-100"
-                    type="color"
-                    defaultValue="green"
-                    id="example-color-input"
-                    style={{
-                        border: '1px solid #6063af',
-                        backgroundColor: 'transparent',
-                        borderRadius: '5px',
-                        width: '100%', fontSize: '15px', color: 'white',
-                    }}
-                />
-
-                <button type="button" style={{ backgroundColor: '#404380' }} className="btn text-white px-5  waves-effect waves-light text-center d-flex justify-content-start  mt-5">Submit</button>
-
             </div>
 
-            {/* <div className='col-12  px-4 py-2  d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+            <div className='col-12 px-4 py-2 d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+                {Object.keys(colorSettings).map((key, index) => (
+                    <div key={index} className="mb-4 w-100">
+                        <p className='mb-2' style={{ fontSize: '17px' }}>{key.replace(/([A-Z])/g, ' $1')}</p>
+                        <input
+                            className="form-control form-control-color w-100"
+                            type="color"
+                            value={colorSettings[key]}
+                            onChange={event => handleColorChange(event, key)}
+                            style={{
+                                border: '1px solid #6063af',
+                                backgroundColor: 'transparent',
+                                borderRadius: '5px',
+                                width: '100%',
+                                fontSize: '15px',
+                                color: 'white',
+                            }}
+                        />
+                    </div>
+                ))}
 
                 <button
-                    type="button" style={{ backgroundColor: '#404380' }}
-                    className="btn text-white px-5  waves-effect waves-light text-center d-flex justify-content-start  mt-5"
-                >Submit</button>
+                    type="button"
+                    onClick={handleSubmit}
+                    style={{ backgroundColor: '#404380' }}
+                    className="btn text-white px-5 mt-5"
+                >
+                    Submit
+                </button>
+            </div>
 
-            </div> */}
-
+            <ViewSetting
+                settingsList={settingsList}
+                setSettingsList={setSettingsList}
+                setColorSettings={setColorSettings}
+                setSelectedFiles={setSelectedFiles}
+            />
         </div>
-    )
+    );
 }
 
-export default Setting
+export default Setting;

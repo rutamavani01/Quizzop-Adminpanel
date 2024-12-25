@@ -7,6 +7,10 @@ import Login from '../Pages/Login';
 import Quiz from '../Pages/Quiz';
 import Setting from '../Pages/Setting';
 import Category_edit from '../Pages/Category_edit';
+import ViewQuiz from '../Pages/ViewQuiz';
+import { EditQuiz } from '../Pages/EditQuiz';
+import EditSetting from '../Pages/EditSetting';
+import Rules from '../Pages/Rules';
 
 const Routes = () => {
     return (
@@ -21,7 +25,14 @@ const Routes = () => {
 
 
                 <Route path='/quiz' element={<Quiz />} />
+                <Route path="/edit-quiz/:id" element={<EditQuiz />} />
+
                 <Route path='/setting' element={<Setting />} />
+                <Route path="/edit-setting/:id" element={<EditSetting />} />
+
+
+                <Route path='/rules' element={<Rules />} />
+
             </Route>
         </RouterRoutes>
     );
