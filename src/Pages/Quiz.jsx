@@ -1,50 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import ViewQuiz from './ViewQuiz';
-
+import { addQuiz, getCategoriesDrodown } from '../Conf/Api';
 function Quiz() {
   const [categories, setCategories] = useState([]);
   const [quizData, setQuizData] = useState({
-    categoryName: "",
+    categoryId: "", // Store categoryId instead of categoryName
     question: "",
     optionA: "",
     optionB: "",
     optionC: "",
     optionD: "",
-    correctAnswer: ""
+    correctAnswer: "",
   });
 
+
   useEffect(() => {
-    const storedCategories = JSON.parse(localStorage.getItem('categories')) || [];
-    setCategories(storedCategories);
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategoriesDrodown(); // Fetch categories
+        setCategories(data || []); // Ensure it sets an array
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]); // Fallback to empty array in case of error
+      }
+    };
+
+    fetchCategories();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setQuizData(prev => ({
+  const handleCategoryChange = (e) => {
+    const selectedId = e.target.value; // Get the category ID
+    setQuizData((prev) => ({
       ...prev,
-      [name]: value
+      categoryId: selectedId, // Update categoryId in quizData
     }));
   };
 
-  const handleSubmit = () => {
-    if (!quizData.categoryName) {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setQuizData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!quizData.categoryId) {
       alert("Please select a category");
       return;
     }
-    const existingQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    existingQuizzes.push(quizData);
-    localStorage.setItem('quizzes', JSON.stringify(existingQuizzes));
+    const apiData = {
+      question: quizData.question,
+      A: quizData.optionA,
+      B: quizData.optionB,
+      C: quizData.optionC,
+      D: quizData.optionD,
+      answer: quizData.correctAnswer, 
+      categoryId: quizData.categoryId,
+    };
 
-    alert("Quiz added successfully!");
-    setQuizData({
-      categoryName: "",
-      question: "",
-      optionA: "",
-      optionB: "",
-      optionC: "",
-      optionD: "",
-      correctAnswer: ""
-    });
+    try {
+      await addQuiz(apiData);
+      alert("Quiz added successfully!");
+      setQuizData({
+        categoryId: "",
+        question: "",
+        optionA: "",
+        optionB: "",
+        optionC: "",
+        optionD: "",
+        correctAnswer: "",
+      });
+    } catch (error) {
+      alert("Failed to add quiz. Please try again.");
+    }
   };
 
   return (
@@ -53,10 +82,10 @@ function Quiz() {
         <div className='text-white col-6 p-2'>
           <p className='mb-2' style={{ fontSize: '17px' }}>Category Name</p>
           <select
-            name="categoryName"
-            value={quizData.categoryName}
-            onChange={handleInputChange}
-            className='p-2'
+            name="categoryId"
+            value={quizData.categoryId}
+            onChange={handleCategoryChange}
+            className="p-2"
             style={{
               border: '1px solid #6063af',
               backgroundColor: 'transparent',
@@ -66,13 +95,21 @@ function Quiz() {
               color: 'white',
             }}
           >
-            <option value="" style={{  backgroundColor: '#191a32',}}>Select Category</option>
-            {categories.map((category, index) => (
-              <option key={index} value={category.name} style={{  backgroundColor: '#191a32 ',}}>
-                {category.name}
-              </option>
-            ))}
+            <option value="" style={{ backgroundColor: '#191a32', color: 'white' }}>
+              Select Category
+            </option>
+            {Array.isArray(categories) &&
+              categories.map((category) => (
+                <option
+                  key={category.id}
+                  value={category.id} // Use category ID as value
+                  style={{ backgroundColor: '#191a32', color: 'white' }}
+                >
+                  {category.title} {/* Display the title */}
+                </option>
+              ))}
           </select>
+
         </div>
 
         <div className='text-white col-12 p-2'>
@@ -186,13 +223,14 @@ function Quiz() {
               color: 'white',
             }}
           >
-            <option value="" className='p-1' style={{  backgroundColor: '#191a32 ',}}>Select Correct Answer</option>
-            <option value="optionA" style={{  backgroundColor: '#191a32 ',}}>A</option>
-            <option value="optionB" style={{  backgroundColor: '#191a32 ',}}>B</option>
-            <option value="optionC" style={{  backgroundColor: '#191a32 ',}}>C</option>
-            <option value="optionD" style={{  backgroundColor: '#191a32 ',}}>D</option>
+            <option value="" style={{ backgroundColor: '#191a32 ', color: 'white' }}>Select Correct Answer</option>
+            <option value="A" style={{ backgroundColor: '#191a32 ', color: 'white' }}>A</option>
+            <option value="B" style={{ backgroundColor: '#191a32 ', color: 'white' }}>B</option>
+            <option value="C" style={{ backgroundColor: '#191a32 ', color: 'white' }}>C</option>
+            <option value="D" style={{ backgroundColor: '#191a32 ', color: 'white' }}>D</option>
           </select>
         </div>
+
 
         <div className='text-white col-12 mt-2'>
           <button
@@ -205,7 +243,7 @@ function Quiz() {
           </button>
         </div>
       </div>
-        <ViewQuiz/>
+      <ViewQuiz />
     </div>
   );
 }

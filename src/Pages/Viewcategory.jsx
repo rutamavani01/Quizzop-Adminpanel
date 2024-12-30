@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getCategories } from '../Conf/Api';
+import { handleDeleteCategory } from '../Conf/Api'; // Import your delete function
 
 function Viewcategory() {
   const [categories, setCategories] = useState([]);
-  const BASE_URL = 'http://192.168.1.10:8000';
+  const BASE_URL = 'http://192.168.1.8:8000';
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -21,9 +22,21 @@ function Viewcategory() {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    // Extract just the filename from the full path
     const filename = imagePath.split('\\').pop();
     return `${BASE_URL}/uploads/${filename}`;
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await handleDeleteCategory(id); // Call the delete function
+      if (response) {
+        // Remove the deleted category from the local state
+        setCategories((prevCategories) => prevCategories.filter(category => category.id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Error deleting category.');
+    }
   };
 
   return (
@@ -80,10 +93,7 @@ function Viewcategory() {
                 </Link>
 
                 <button
-                  onClick={() => {
-                    const updatedCategories = categories.filter((_, i) => i !== index);
-                    setCategories(updatedCategories);
-                  }}
+                  onClick={() => handleDelete(category.id)} // Call handleDelete with category id
                   className="text-danger fs-5"
                   style={{ border: 'none', background: 'transparent' }}
                 >

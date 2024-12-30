@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
-import { Card } from 'reactstrap';
+import { addRules } from '../Conf/Api'; 
+import ViewRules from './ViewRules';
 
 const Rules = () => {
-    const [rules, setRules] = useState([""]); // Initialize with one empty rule input
+    const [rules, setRules] = useState([{ rules: "" }]);
 
     const handleAddRule = () => {
-        setRules([...rules, ""]); // Add an empty string to the rules array to add a new field
+        setRules([...rules, { rules: "" }]); 
     };
 
     const handleInputChange = (index, value) => {
         const updatedRules = [...rules];
-        updatedRules[index] = value;
+        updatedRules[index].rules = value; 
         setRules(updatedRules);
     };
 
-    const handleSubmit = () => {
-        alert("Rules submitted: " + rules.join(", ")); // Handle the submission, e.g., logging the rules
-        // You can add logic to save or send the rules as required
+    const handleSubmit = async () => {
+        try {
+            await addRules(rules);
+            alert("Rules submitted successfully!");
+        } catch (error) {
+            console.error('Error submitting rules:', error);
+            alert('Error submitting rules');
+        }
     };
 
     return (
@@ -32,7 +38,7 @@ const Rules = () => {
                             <input
                                 className="form-control d-inline"
                                 type="text"
-                                value={rule}
+                                value={rule.rules}
                                 onChange={(e) => handleInputChange(index, e.target.value)}
                                 style={{
                                     border: '1px solid #6063af',
@@ -63,7 +69,7 @@ const Rules = () => {
                             +
                         </button>
                     </span>
-                 
+
                     {/* Submit Button */}
                     <div className="mt-4">
                         <button
@@ -76,13 +82,13 @@ const Rules = () => {
                                 padding: '10px 20px',
                                 borderRadius: '5px',
                                 cursor: 'pointer',
-                            }}
-                        >
+                            }}>
                             Submit
                         </button>
                     </div>
                 </div>
             </div>
+            <ViewRules />
         </div>
     );
 };

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Form, CardBody, CardTitle } from 'reactstrap';
+import React, { useState } from 'react';
+import { Card, Row, Col } from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import Viewcategory from './Viewcategory';
 import { addCategory } from '../Conf/Api';
@@ -11,50 +11,24 @@ const Category = () => {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  function handleAcceptedFiles(files) {
-    const file = files[0];
-    if (!file) {
-      alert('No file selected.');
-      return;
+  const handleFileDrop = (acceptedFiles) => {
+    if (acceptedFiles.length) {
+      const file = acceptedFiles[0];
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setSelectedFile({
+          file: file,
+          base64: reader.result
+        });
+      };
+
+      reader.readAsDataURL(file);
     }
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file.');
-      return;
-    }
-
-    // Validate file size (e.g., 5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size should be less than 5MB.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64String = reader.result;
-      setSelectedFile({
-        name: file.name,
-        preview: URL.createObjectURL(file),
-        base64: base64String,
-        formattedSize: formatBytes(file.size),
-      });
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
+  };
 
   const handleSubmit = async () => {
     try {
-      // Validate inputs
       if (!categoryName.trim()) {
         alert('Please enter a category name.');
         return;
@@ -106,116 +80,54 @@ const Category = () => {
     <div className="p-4">
       <h5 className="text-white mb-3">Category Add</h5>
 
-      <div
-        className="col-12 p-4"
-        style={{
-          backgroundColor: "#191a32",
-          color: "white",
-          width: "100%",
-          borderRadius: "5px",
-        }}>
+      <div className="col-12 p-4" style={{ backgroundColor: "#191a32", color: "white", width: "100%", borderRadius: "5px" }}>
         <div className="text-white">
-          <p className=" mb-2" style={{ fontSize: "17px" }}>
-            Category Name
-          </p>
+          <p className="mb-2" style={{ fontSize: "17px" }}>Category Image</p>
+          <Dropzone onDrop={handleFileDrop} accept="image/*">
+            {({ getRootProps, getInputProps }) => (
+              <div {...getRootProps()} style={{
+                border: "1px solid #6063af", backgroundColor: "transparent", borderRadius: "5px", width: "100%", padding: "10px", cursor: "pointer"
+              }}>
+                <input {...getInputProps()} />
+                {selectedFile ? (
+                  <div className="text-start">
+                    <img
+                      src={selectedFile.base64}
+                      alt="Category"
+                      style={{ maxWidth: "70px", height: "auto", objectFit: "cover" }}
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center">Drag and drop or click to select an image</p>
+                )}
+
+              </div>
+            )}
+          </Dropzone>
+        </div>
+
+        <div className="text-white mt-4">
+          <p className="mb-2" style={{ fontSize: "17px" }}>Category Name</p>
           <input
             type="text"
             className="py-2"
-            style={{
-              border: "1px solid #6063af",
-              backgroundColor: "transparent",
-              borderRadius: "5px",
-              width: "100%",
-              fontSize: "15px",
-              color: "white",
-            }}
+            style={{ border: "1px solid #6063af", backgroundColor: "transparent", borderRadius: "5px", width: "100%", fontSize: "15px", color: "white" }}
             value={categoryName}
             onChange={(e) => setCategoryName(e.target.value)}
           />
         </div>
 
         <div className="text-white mt-4">
-          <p className=" mb-2" style={{ fontSize: "17px" }}>
-            Category Description
-          </p>
+          <p className="mb-2" style={{ fontSize: "17px" }}>Category Description</p>
           <textarea
-            type="text"
             className="py-2"
-            style={{
-              border: "1px solid #6063af",
-              backgroundColor: "transparent",
-              borderRadius: "5px",
-              width: "100%",
-              fontSize: "15px",
-              color: "white",
-            }}
+            style={{ border: "1px solid #6063af", backgroundColor: "transparent", borderRadius: "5px", width: "100%", fontSize: "15px", color: "white" }}
             value={categoryDesc}
             onChange={(e) => setCategoryDesc(e.target.value)}
           />
         </div>
 
         <div className="mt-4">
-          <Card style={{ backgroundColor: "transparent", border: "none" }}>
-            <CardBody className="p-0">
-              <CardTitle style={{ fontSize: "17px" }} className=" text-white">
-                Category Image
-              </CardTitle>
-              <div className="mb-5 m-auto">
-                <Form className="text-center text-white">
-                  <Dropzone onDrop={(acceptedFiles) => handleAcceptedFiles(acceptedFiles)} maxFiles={1}>
-                    {({ getRootProps, getInputProps }) => (
-                      <div
-                        className="dropzone"
-                        style={{
-                          border: "2px dotted #6063af",
-                          padding: "50px",
-                          borderRadius: "5px",
-                        }}>
-                        <div className="dz-message needsclick" {...getRootProps()}>
-                          <input {...getInputProps()} />
-                          <div className="mb-1">
-                            <i className="bi bi-cloud-arrow-up  display-4  text-white"></i>
-                          </div>
-                          <h4>Drop file here or click to upload.</h4>
-                        </div>
-                      </div>
-                    )}
-                  </Dropzone>
-                  {selectedFile && (
-                    <div className="dropzone-previews mt-3" id="file-previews">
-                      <Card
-                        className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
-                        style={{
-                          backgroundColor: "transparent",
-                          border: "none",
-                        }}>
-                        <div className="p-2">
-                          <Row className="align-items-center">
-                            <Col className="col-auto">
-                              <img
-                                data-dz-thumbnail=""
-                                height="80"
-                                className="avatar-sm rounded bg-light"
-                                alt={selectedFile.name}
-                                src={selectedFile.preview}
-                              />
-                            </Col>
-                            <Col className="text-start">
-                              <p className="text-white font-weight-bold">{selectedFile.name}</p>
-                              <p className="mb-0 text-white">
-                                <strong>{selectedFile.formattedSize}</strong>
-                              </p>
-                            </Col>
-                          </Row>
-                        </div>
-                      </Card>
-                    </div>
-                  )}
-                </Form>
-              </div>
-            </CardBody>
-          </Card>
-
           <button
             type="button"
             style={{ backgroundColor: "#404380" }}
@@ -225,7 +137,6 @@ const Category = () => {
           >
             {isLoading ? 'Adding...' : 'Submit'}
           </button>
-          
         </div>
       </div>
 

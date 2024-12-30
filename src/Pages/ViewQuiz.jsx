@@ -1,20 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom'; // Correcting the import to 'react-router-dom'
+import { Link } from 'react-router-dom';
+import { getQuizzes, deleteQuiz, getCategoriesDrodown } from '../Conf/Api';
 
 const ViewQuiz = () => {
     const [quizzes, setQuizzes] = useState([]);
+    // console.log(quizzes);
+    
+    const [categories, setCategories] = useState([]);
 
-    // Fetch quizzes from localStorage when the component mounts
     useEffect(() => {
-        const storedQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-        setQuizzes(storedQuizzes);
+        const fetchCategories = async () => {
+            try {
+                const data = await getCategoriesDrodown(); // Fetch categories
+                setCategories(data || []); // Ensure it sets an array
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                setCategories([]); // Fallback to empty array in case of error
+            }
+        };
+
+        fetchCategories();
     }, []);
 
-    // Function to handle quiz deletion
-    const handleDelete = (index) => {
-        const updatedQuizzes = quizzes.filter((_, quizIndex) => quizIndex !== index);
-        setQuizzes(updatedQuizzes);
-        localStorage.setItem('quizzes', JSON.stringify(updatedQuizzes));
+    useEffect(() => {
+        const fetchQuizzes = async () => {
+            try {
+                const quizzesData = await getQuizzes();
+                setQuizzes(quizzesData.data);
+            } catch (error) {
+                console.error('Error loading quizzes:', error);
+            }
+        };
+
+        fetchQuizzes();
+    }, []);
+
+    const handleDelete = async (id) => {
+        try {
+            await deleteQuiz(id);
+            setQuizzes((prevQuizzes) => prevQuizzes.filter((quiz) => quiz.id !== id));
+        } catch (error) {
+            console.error('Error deleting quiz:', error);
+        }
     };
 
     return (
@@ -39,34 +66,47 @@ const ViewQuiz = () => {
                         </tr>
                     </thead>
                     <tbody style={{ backgroundColor: '#191a32' }}>
-                        {quizzes.map((quiz, index) => (
-                            <tr key={index}>
-                                <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{quiz.categoryName}</td>
-                                <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{quiz.question}</td>
-                                <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
-                                    A: {quiz.optionA}<br />
-                                    B: {quiz.optionB}<br />
-                                    C: {quiz.optionC}<br />
-                                    D: {quiz.optionD}
-                                </td>
-                                <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{quiz.correctAnswer}</td>
-                                <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
-                                    <Link
-                                        to={`/edit-quiz/${index}`}
-                                        className="text-success me-3 fs-5"
-                                    >
-                                        <i className="fa-solid fa-pen-to-square"></i>
-                                    </Link>
-                                    <button
-                                        onClick={() => handleDelete(index)} // Call handleDelete with the correct index
-                                        className="text-danger fs-5"
-                                        style={{ border: 'none', background: 'transparent' }}
-                                    >
-                                        <i className="fa-solid fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                        {quizzes.map((quiz) => {
+                            // Find the category title for the quiz
+                            const category = categories.find((cat) => cat.id === quiz.categoryId); // Assuming `categoryId` links quiz to category
+                            return (
+                                <tr key={quiz.id}>
+                                    <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
+                                        {category ? category.title : 'Category not found'}
+                                    </td>
+                                    <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
+                                        {quiz.question}
+                                    </td>
+                                    <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
+                                        A: {quiz.A}
+                                        <br />
+                                        B: {quiz.B}
+                                        <br />
+                                        C: {quiz.C}
+                                        <br />
+                                        D: {quiz.D}
+                                    </td>
+                                    <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
+                                        {quiz.answer}
+                                    </td>
+                                    <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
+                                        <Link
+                                            to={`/edit-quiz/${quiz.id}`}
+                                            className="text-success me-3 fs-5"
+                                        >
+                                            <i className="fa-solid fa-pen-to-square"></i>
+                                        </Link>
+                                        <button
+                                            onClick={() => handleDelete(quiz.id)}
+                                            className="text-danger fs-5"
+                                            style={{ border: 'none', background: 'transparent' }}
+                                        >
+                                            <i className="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             ) : (

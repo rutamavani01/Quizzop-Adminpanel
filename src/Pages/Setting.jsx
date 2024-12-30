@@ -1,158 +1,114 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Form, CardBody, CardTitle } from 'reactstrap';
-import Dropzone from 'react-dropzone';
-import ViewSetting from './ViewSetting';
+import { addSetting } from '../Conf/Api';
 
 function Setting() {
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [colorSettings, setColorSettings] = useState({
-        backgroundColor: '#191a32',
-        cardColor: '#26284c',
-        borderColor: '#282a4f',
-        headingTextColor: '#ffffff',
-        textColor: '#8789c3',
-        titleButtonColor: '#FFD2A0',
-        correctAnswerButtonColor: '#008000',
-        wrongAnswerButtonColor: '#FF0000',
-        loginButtonColor: 'green',
-    });
-    const [settingsList, setSettingsList] = useState([]);
-    const [title, setTitle] = useState("");  // State for the title input
+    const defaultColors = {
+        bgcolor: '#191a32',
+        loginbuttoncolor: 'green',
+        loginbuttonbordercolor: '#6063af',
+        cardcolor: '#26284c',
+        bordercolor: '#282a4f',
+        headingtextcolor: '#ffffff',
+        textcolor: '#8789c3',
+        titlebuttoncolor: '#FFD2A0',
+        correctanscolor: '#008000',
+        wronganscolor: '#FF0000'
+    };
 
-    useEffect(() => {
-        const savedSettingsList = JSON.parse(localStorage.getItem('settingsList')) || [];
-        setSettingsList(savedSettingsList);
-    }, []);
+    const [colorSettings, setColorSettings] = useState(defaultColors);
+    const [title, setTitle] = useState("");
+    const [image, setImage] = useState(null);
+    const [lastSubmittedColors, setLastSubmittedColors] = useState(null);
 
-    function handleAcceptedFiles(files) {
-        if (files.length > 0) {
-            const file = files[0];
-            const updatedFile = Object.assign(file, {
-                preview: URL.createObjectURL(file),
-                formattedSize: formatBytes(file.size),
-            });
-            setSelectedFiles([updatedFile]);
+    // useEffect(() => {
+    //     // const savedColors = localStorage.getItem('lastSubmittedColors');
+    //     if (savedColors) {
+    //         setLastSubmittedColors(JSON.parse(savedColors));
+    //         setColorSettings(JSON.parse(savedColors));
+    //     }
+    // }, []);
+
+    const handleColorChange = (event, colorKey) => {
+        setColorSettings(prev => ({
+            ...prev,
+            [colorKey]: event.target.value
+        }));
+    };
+
+    const handleSubmit = async () => {
+        const formData = new FormData();
+
+        // Add all color settings to formData
+        formData.append('bgcolor', colorSettings.bgcolor);
+        formData.append('loginbuttoncolor', colorSettings.loginbuttoncolor);
+        formData.append('loginbuttonbordercolor', colorSettings.loginbuttonbordercolor);
+        formData.append('title', title);
+        formData.append('cardcolor', colorSettings.cardcolor);
+        formData.append('bordercolor', colorSettings.bordercolor);
+        formData.append('headingtextcolor', colorSettings.headingtextcolor);
+        formData.append('textcolor', colorSettings.textcolor);
+        formData.append('titlebuttoncolor', colorSettings.titlebuttoncolor);
+        formData.append('correctanscolor', colorSettings.correctanscolor);
+        formData.append('wronganscolor', colorSettings.wronganscolor);
+
+        // Add image if selected
+        if (image) {
+            formData.append('logo', image);
         }
-    }
 
-    function formatBytes(bytes, decimals = 2) {
-        if (bytes === 0) return "0 Bytes";
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-    }
+        try {
+            const response = await addSetting(formData);
+            console.log('Setting added successfully:', response);
 
-    function handleColorChange(event, colorKey) {
-        setColorSettings({
-            ...colorSettings,
-            [colorKey]: event.target.value,
-        });
-    }
+            // Save submitted colors to localStorage
+            // localStorage.setItem('lastSubmittedColors', JSON.stringify(colorSettings));
+            setLastSubmittedColors(colorSettings);
 
-    function handleSubmit() {
-        if (!selectedFiles.length || !title.trim()) {
-            alert('Please provide a title and upload a logo before submitting.');
-            return;
+            // Clear form fields except colors
+            setTitle("");
+            setImage(null);
+
+            alert('Settings saved successfully!');
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            alert('Error saving settings');
         }
+    };
 
-        const newSetting = {
-            id: Date.now(),
-            title, 
-            colorSettings,
-            selectedFiles: selectedFiles.map(file => ({
-                name: file.name,
-                preview: file.preview,
-                size: file.formattedSize
-            })),
-            createdAt: new Date().toISOString()
-        };
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setImage(file);
+        }
+    };
 
-        const updatedSettingsList = [...settingsList, newSetting];
-        setSettingsList(updatedSettingsList);
-        localStorage.setItem('settingsList', JSON.stringify(updatedSettingsList));
-
-        alert('Settings saved successfully!');
-        setTitle(""); 
-        setColorSettings({
-            backgroundColor: '#191a32',
-            cardColor: '#26284c',
-            borderColor: '#282a4f',
-            headingTextColor: '#ffffff',
-            textColor: '#8789c3',
-            titleButtonColor: '#FFD2A0',
-            correctAnswerButtonColor: '#008000',
-            wrongAnswerButtonColor: '#FF0000',
-            loginButtonColor: 'green',
-        });
-        setSelectedFiles([]);
-    }
 
     return (
         <div className='p-4'>
             <h5 className="text-white mb-3">Setting Add</h5>
-            <div className='col-12 d-flex flex-wrap px-4 py-2' style={{ backgroundColor: 'transparent', color: 'white', width: '100%', borderRadius: '5px' }}>
-                <Card style={{ backgroundColor: 'transparent', border: 'none', width: '100%' }}>
-                    <CardBody className='p-0'>
-                        <CardTitle style={{ fontSize: '17px' }} className="text-white">Logo</CardTitle>
-                        <div className="mb-5 m-auto">
-                            <Form className='text-center text-white'>
-                                <Dropzone onDrop={acceptedFiles => handleAcceptedFiles(acceptedFiles)}>
-                                    {({ getRootProps, getInputProps }) => (
-                                        <div className="dropzone" style={{ border: `2px dotted ${colorSettings.borderColor}`, padding: '50px', borderRadius: '5px' }}>
-                                            <div className="dz-message needsclick" {...getRootProps()}>
-                                                <input {...getInputProps()} />
-                                                <div className="mb-1">
-                                                    <i className="bi bi-cloud-arrow-up display-4 text-white"></i>
-                                                </div>
-                                                <h4>Drop files here or click to upload.</h4>
-                                            </div>
-                                        </div>
-                                    )}
-                                </Dropzone>
-                                <div className="dropzone-previews mt-3" id="file-previews">
-                                    {selectedFiles.map((f, i) => (
-                                        <Card
-                                            className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
-                                            key={i + "-file"}
-                                            style={{ backgroundColor: 'transparent', border: 'none' }}
-                                        >
-                                            <div className="p-2">
-                                                <Row className="align-items-center">
-                                                    <Col className="col-auto">
-                                                        <img
-                                                            data-dz-thumbnail=""
-                                                            height="80"
-                                                            className="avatar-sm rounded bg-light"
-                                                            alt={f.name}
-                                                            src={f.preview}
-                                                        />
-                                                    </Col>
-                                                    <Col className='text-start'>
-                                                        <p className="text-white font-weight-bold">{f.name}</p>
-                                                        <p className="mb-0 text-white">
-                                                            <strong>{f.formattedSize}</strong>
-                                                        </p>
-                                                    </Col>
-                                                </Row>
-                                            </div>
-                                        </Card>
-                                    ))}
-                                </div>
-                            </Form>
-                        </div>
-                    </CardBody>
-                </Card>
-            </div>
 
-            <div className='col-12 px-4 py-2 ' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+            <div className='col-12 px-4 py-2' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+                <p className='mb-2' style={{ fontSize: '17px' }}>Logo</p>
+                <input
+                    className="form-control w-100 mb-3"
+                    type="file"
+                    onChange={handleImageChange}
+                    style={{
+                        border: '1px solid #6063af',
+                        backgroundColor: 'transparent',
+                        borderRadius: '5px',
+                        width: '100%',
+                        fontSize: '15px',
+                        color: 'white',
+                    }}
+                />
+
                 <p className='mb-2' style={{ fontSize: '17px' }}>Title</p>
                 <input
                     className="form-control w-100"
                     type="text"
                     value={title}
-                    onChange={event => setTitle(event.target.value)}  // Bind input value to title state
+                    onChange={event => setTitle(event.target.value)}
                     style={{
                         border: '1px solid #6063af',
                         backgroundColor: 'transparent',
@@ -165,42 +121,164 @@ function Setting() {
             </div>
 
             <div className='col-12 px-4 py-2 d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
-                {Object.keys(colorSettings).map((key, index) => (
-                    <div key={index} className="mb-4 w-100">
-                        <p className='mb-2' style={{ fontSize: '17px' }}>{key.replace(/([A-Z])/g, ' $1')}</p>
-                        <input
-                            className="form-control form-control-color w-100"
-                            type="color"
-                            value={colorSettings[key]}
-                            onChange={event => handleColorChange(event, key)}
-                            style={{
-                                border: '1px solid #6063af',
-                                backgroundColor: 'transparent',
-                                borderRadius: '5px',
-                                width: '100%',
-                                fontSize: '15px',
-                                color: 'white',
-                            }}
-                        />
-                    </div>
-                ))}
+                {/* {Object.keys(colorSettings).map((key, index) => ( */}
+                <div className="mb-4 w-100">
+                    <p className='mb-2' style={{ fontSize: '17px' }}>backgroundColor</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-3"
+                        type="color"
+                        value={colorSettings.bgcolor}
+                        onChange={(e) => handleColorChange(e, 'bgcolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                    <p className='mb-2' style={{ fontSize: '17px' }}>Login Button Color</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-3"
+                        type="color"
+                        value={colorSettings.loginbuttoncolor}
+                        onChange={(e) => handleColorChange(e, 'loginbuttoncolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                    <p className='mb-2' style={{ fontSize: '17px' }}>Login Button Border Color</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-3"
+                        type="color"
+                        value={colorSettings.loginbuttonbordercolor}
+                        onChange={(e) => handleColorChange(e, 'loginbuttonbordercolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                    <p className='mb-2' style={{ fontSize: '17px' }}>Card Color</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-3"
+                        type="color"
+                        value={colorSettings.cardcolor}
+                        onChange={(e) => handleColorChange(e, 'cardcolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                    <p className='mb-2' style={{ fontSize: '17px' }}>Border Color</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-3"
+                        type="color"
+                        value={colorSettings.bordercolor}
+                        onChange={(e) => handleColorChange(e, 'bordercolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                    <p className='mb-2' style={{ fontSize: '17px' }}> Title Button Color</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-3"
+                        type="color"
+                        value={colorSettings.titlebuttoncolor}
+                        onChange={(e) => handleColorChange(e, 'titlebuttoncolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                    <p className='mb-2' style={{ fontSize: '17px' }}> Heading Text Color</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-3"
+                        type="color"
+                        value={colorSettings.headingtextcolor}
+                        onChange={(e) => handleColorChange(e, 'headingtextcolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                    <p className='mb-2' style={{ fontSize: '17px' }}> Correct Button Color</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-3"
+                        type="color"
+                        value={colorSettings.correctanscolor}
+                        onChange={(e) => handleColorChange(e, 'correctanscolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                    <p className='mb-2' style={{ fontSize: '17px' }}> Wrong Button Color</p>
+                    <input
+                        className="form-control form-control-color w-100 mb-1"
+                        type="color"
+                        value={colorSettings.wronganscolor}
+                        onChange={(e) => handleColorChange(e, 'wronganscolor')}
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
+                    />
+
+                </div>
+                {/* ))} */}
 
                 <button
                     type="button"
                     onClick={handleSubmit}
                     style={{ backgroundColor: '#404380' }}
-                    className="btn text-white px-5 mt-5"
+                    className="btn text-white px-5 mt-2"
                 >
                     Submit
                 </button>
             </div>
-
-            <ViewSetting
-                settingsList={settingsList}
-                setSettingsList={setSettingsList}
-                setColorSettings={setColorSettings}
-                setSelectedFiles={setSelectedFiles}
-            />
         </div>
     );
 }
