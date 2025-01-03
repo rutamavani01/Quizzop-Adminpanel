@@ -8,6 +8,13 @@ const API = axios.create({
     },
 });
 
+const APIFORMDATA = axios.create({
+    baseURL: 'http://192.168.1.8:8000/api/',
+    headers: {
+        'Content-Type': 'multipart/form-data',
+    },
+});
+
 // Add a category
 export const addCategory = async (categoryData) => {
     try {
@@ -20,20 +27,10 @@ export const addCategory = async (categoryData) => {
         formData.append('endtime', categoryData.endtime);
         formData.append('playcoin', categoryData.playcoin);
         formData.append('wincoin', categoryData.wincoin);
+        formData.append('image', categoryData.image);
 
-        // Handle image data
-        if (categoryData.image) {
-            // Convert base64 to blob
-            const base64Data = categoryData.image.split(',')[1];
-            const blob = await fetch(categoryData.image).then(res => res.blob());
-            formData.append('image', blob, 'image.jpg');
-        }
 
-        const response = await API.post('/category', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const response = await APIFORMDATA.post('/category', formData);
         return response.data;
     } catch (error) {
         console.error('Error adding category:', error);
@@ -66,7 +63,7 @@ export const getCategoryById = async (id) => {
 // Update category by ID
 export const updateCategoryById = async (id, data) => {
     try {
-        const response = await API.put(`/category/${id}`, data);
+        const response = await APIFORMDATA.put(`/category/${id}`, data);
         return response.data;
     } catch (error) {
         console.error('Failed to update category:', error);
@@ -163,7 +160,41 @@ export const addSetting = async (settingData) => {
         });
         return response.data;
     } catch (error) {
+        throw error;
         console.error('Error adding setting:', error);
+    }
+};
+
+export const getSetting = async () => {
+    try {
+        const response = await API.get('/setting');
+        console.log(response.data.Data);
+
+        return response.data.Data;
+
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+    }
+};
+
+export const fetchSetting = async (id) => {
+    try {
+        const response = await API.get(`/setting/${id}`);
+        return response.data;
+
+    } catch (error) {
+        console.error('Error fetching setting data:', error);
+        throw error;
+    }
+}
+
+export const updateSetting = async (id, settingData) => {
+    try {
+        const response = await APIFORMDATA.put(`/setting/${id}`, settingData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating quiz:', error);
         throw error;
     }
 };
@@ -190,3 +221,126 @@ export const getRules = async () => {
         throw error;
     }
 }
+
+export const fetchRules = async (id) => {
+    try {
+        const response = await API.get(`/rules/${id}`);
+        console.log('API Response:', response.data); // Log the full response
+        if (response.data && response.data.Data) {
+            return response.data.Data; // Return the expected data
+        } else {
+            console.error('No Data found');
+            return []; // Return an empty array if data is not found
+        }
+    } catch (error) {
+        console.error('Error fetching rules data:', error);
+        throw error;
+    }
+};
+
+export const updateRules = async (id, rules) => {
+    try {
+        const response = await API.put(`/rules/${id}`, rules);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating rules:', error);
+        throw error;
+    }
+};
+
+export const deleteRules = async (id) => {
+    try {
+        await API.delete(`/rules/${id}`);
+    } catch (error) {
+        console.error('Error deleting rules:', error);
+        throw error;
+    }
+};
+
+export const getQuizSort = async (id) => {
+    try {
+        const response = await API.get(`/quizque/categoryfilter/${id}`);
+        return response;
+    } catch (error) {
+        console.error("Error fetching category filter:", error);
+        throw error;
+    }
+}
+
+// pages
+export const addPage = async (pageData) => {
+    try {
+        const response = await API.post('/footer', pageData)
+        return response;
+    } catch (error) {
+        console.error("Error fetching add page:", error);
+        throw error;
+    }
+}
+
+// export const getPageName = async () => {
+//     try {
+//         const response = await API.get('/footer');
+//         console.log(response.data.data);
+
+//         return response.data.data;
+//     } catch (error) {
+//         console.error("Error fetching footer:", error);
+//         throw error;
+//     }
+// }
+
+export const getPageAllData = async (id) => {
+    try {
+        const response = await API.get(`/footer/all_data`);
+        // console.log(response.data.data);
+        return response.data.data;
+    } catch (error) {
+        console.error("Error fetching footer:", error);
+        throw error;
+    }
+}
+
+export const fetchPages = async (id) => {
+    try {
+        const response = await API.get(`/footer/${id}`);
+        // console.log("Fetched Page Data:", response.data.data);  
+        return response.data.data;  // Return the data (not the whole response)
+    } catch (error) {
+        console.error("Error fetching pages:", error);
+        throw error;
+    }
+};
+
+// Function to update the page
+export const updatePage = async (id, pageData) => {
+    try {
+        const response = await API.put(`/footer/${id}`, pageData);
+        // console.log(response.data.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating page:', error);
+        throw error;
+    }
+};
+
+export const deletePage = async (id) => {
+    try {
+        const response = await API.delete(`/footer/${id}`);
+        // console.log(response.data.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating page:', error);
+        throw error;
+    }
+}
+
+export const login = async ({ email, password }) => {
+    try {
+        const response = await API.post('/login', { email, password });
+        return response.data;  // Return the API response data (including token)
+    } catch (error) {
+        console.error('Error login page:', error);
+        throw error;
+    }
+};

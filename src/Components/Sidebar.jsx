@@ -9,7 +9,8 @@ const Sidebar = () => {
         charts: false,
         tables: false,
         icons: false,
-        maps: false
+        maps: false,
+        pages: false
     });
 
     const toggleMenu = (menu) => {
@@ -83,8 +84,6 @@ const Sidebar = () => {
                     </a>
                     <div className={`ms-3 ${openMenus.uiElements ? 'show' : 'd-none'}`}>
                         <a href="/category" className="nav-link text-secondary">Category</a>
-                        {/* <a href="#" className="nav-link text-secondary">Buttons</a>
-                        <a href="#" className="nav-link text-secondary">Cards</a> */}
                     </div>
                 </div>
 
@@ -102,19 +101,13 @@ const Sidebar = () => {
                             Quiz
                         </div>
                         <div>
-                            <span className="badge bg-info rounded-pill me-2">9</span>
+                            {/* <span className="badge bg-info rounded-pill me-2">9</span> */}
                             <i className={`bi bi-chevron-${openMenus.forms ? 'down' : 'right'}`}></i>
                         </div>
                     </a>
                     <div className={`ms-3 ${openMenus.forms ? 'show' : 'd-none'}`}>
                         <a href="/quiz" className="nav-link text-secondary">Quiz</a>
-                        {/* <a href="#" className="nav-link text-secondary">Form Validation</a>
-                        <a href="#" className="nav-link text-secondary">Form Advanced</a>
-                        <a href="#" className="nav-link text-secondary">Form Editors</a>
-                        <a href="#" className="nav-link text-secondary">Form Upload</a>
-                        <a href="#" className="nav-link text-secondary">Form Repeater</a>
-                        <a href="#" className="nav-link text-secondary">Form Wizard</a>
-                        <a href="#" className="nav-link text-secondary">Form Mask</a> */}
+
                     </div>
                 </div>
 
@@ -162,30 +155,39 @@ const Sidebar = () => {
                     </a>
                     <div className={`ms-3 ${openMenus.rules ? 'show' : 'd-none'}`}>
                         <a href="/rules" className="nav-link text-secondary">Rules</a>
-                        {/* <a href="#" className="nav-link text-secondary">Form Validation</a>
-                        <a href="#" className="nav-link text-secondary">Form Advanced</a>
-                        <a href="#" className="nav-link text-secondary">Form Editors</a>
-                        <a href="#" className="nav-link text-secondary">Form Upload</a>
-                        <a href="#" className="nav-link text-secondary">Form Repeater</a>
-                        <a href="#" className="nav-link text-secondary">Form Wizard</a>
-                        <a href="#" className="nav-link text-secondary">Form Mask</a> */}
+
                     </div>
                 </div>
-                            
-                <a href="#" className="nav-link text-light d-flex align-items-center">
-                    <i className="bi bi-table me-2"></i>
-                    Tables
+
+                <div className="nav-item">
+                    <a
+                        href="#"
+                        className="nav-link text-light d-flex align-items-center justify-content-between"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            toggleMenu('pages');
+                        }}
+                    >
+                        <div>
+                            <i className="bi bi-file-text me-2"></i>
+                            Pages
+                        </div>
+                        <div>
+                            {/* <span className="badge bg-info rounded-pill me-2">9</span> */}
+                            <i className={`bi bi-chevron-${openMenus.pages ? 'down' : 'right'}`}></i>
+                        </div>
+                    </a>
+                    <div className={`ms-3 ${openMenus.pages ? 'show' : 'd-none'}`}>
+                        <a href="/pages" className="nav-link text-secondary">pages</a>
+
+                    </div>
+                </div>
+
+                <a href="/notification" className="nav-link text-light d-flex align-items-center">
+                    <i class="fa-regular fa-bell me-2"></i>
+                    Notification
                 </a>
 
-                <a href="#" className="nav-link text-light d-flex align-items-center">
-                    <i className="bi bi-emoji-smile me-2"></i>
-                    Icons
-                </a>
-
-                <a href="#" className="nav-link text-light d-flex align-items-center">
-                    <i className="bi bi-geo-alt me-2"></i>
-                    Maps
-                </a>
             </nav>
         </div>
     );

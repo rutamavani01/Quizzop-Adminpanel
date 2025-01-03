@@ -1,73 +1,117 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getSetting } from '../Conf/Api';
 import { Link } from 'react-router';
 
-const ViewSetting = ({ settingsList, setSettingsList, setColorSettings, setSelectedFiles, setEditIndex }) => {
-    function handleDelete(index) {
-        const updatedSettingsList = settingsList.filter((_, i) => i !== index);
-        setSettingsList(updatedSettingsList);
-        localStorage.setItem('settingsList', JSON.stringify(updatedSettingsList));
-        alert('Setting deleted successfully!');
-    }
+const ViewSetting = () => {
+    const [settingsList, setSettingsList] = useState([]);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const data = await getSetting();
+                const transformedData = [{
+                    id: data.id,
+                    logo: data.logo,
+                    title: data.title,
+                    ...data.themecolor
+                }];
+                setSettingsList(transformedData);
+            } catch (error) {
+                console.error('Error fetching settings:', error);
+            }
+        };
+
+        fetchSettings();
+    }, []);
+
+    const colorLabels = {
+        bgcolor: 'Background Color',
+        cardcolor: 'Card Color',
+        bordercolor: 'Border Color',
+        textcolor: 'Text Color',
+        loginbuttoncolor: 'Login Button Color',
+        headingtextcolor: 'Heading Text Color',
+        titlebuttoncolor: 'Title Button Color',
+        correctanscolor: 'Correct Answer Color',
+        wronganscolor: 'Wrong Answer Color',
+        loginbuttonbordercolor: 'Login Button Border Color'
+    };
 
     return (
-        <div className='col-12 mt-4'>
-            <h5 className="text-white mb-3">Saved Settings</h5>
-            <table className="table" style={{ backgroundColor: '#191a32' }}>
-                <thead style={{ backgroundColor: 'transparent' }}>
-                    <tr>
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>#</th>
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>Title</th> {/* Add Title column */}
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>Background Color</th>
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>Card Color</th>
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>Border Color</th>
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>Text Color</th>
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>Login Button Color</th>
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>Files</th>
-                        <th style={{ backgroundColor: 'transparent', color: 'white', padding: '20px' }}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody style={{ backgroundColor: 'transparent' }}>
-                    {settingsList.map((setting, index) => (
-                        <tr key={setting.id}>
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{index + 1}</td>
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{setting.title}</td> {/* Display title */}
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{setting.colorSettings.backgroundColor}</td>
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{setting.colorSettings.cardColor}</td>
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{setting.colorSettings.borderColor}</td>
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{setting.colorSettings.textColor}</td>
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>{setting.colorSettings.loginButtonColor}</td>
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
-                                {setting.selectedFiles && setting.selectedFiles.length > 0 ? (
-                                    setting.selectedFiles.map((file, i) => (
-                                        <div key={i}>
-                                            <img src={file.preview} alt={file.name} height="50" weight="50" style={{ marginBottom: '5px' }} />
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p>No Files</p>
-                                )}
-                            </td>
-                            <td style={{ backgroundColor: 'transparent', color: 'white', padding: '10px' }}>
-                                <Link to={`/edit-setting/${setting.id}`}>
-                                    <button
-                                        className="text-success me-3 fs-5"
-                                        style={{ border: 'none', background: 'transparent' }}
-                                    >
-                                        <i className="fa-solid fa-pen-to-square"></i>
-                                    </button>
-                                </Link>
-                                <button
-                                    onClick={() => handleDelete(index)}
-                                    className="text-danger fs-5"
-                                    style={{ border: 'none', background: 'transparent' }}
-                                >
-                                    <i className="fa-solid fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+        <div
+            className="col-12 mt-4 p-3"
+            style={{
+                backgroundColor: '#191a32',
+                color: 'white',
+                width: '100%',
+                borderRadius: '5px',
+            }}
+        >
+            <h5 className="text-white mb-3">View Settings</h5>
+            {settingsList?.map((setting) => (
+                <div key={setting.id}>
+                    <div
+                        className="col-12 px-4 py-2 mb-4"
+                        style={{ borderRadius: '5px' }}
+                    >
+                        <div className="mb-3">
+                            <span
+                                className="me-3"
+                                style={{ fontSize: '17px', marginBottom: '5px' }}
+                            >
+                                Title
+                            </span>
+                            <span style={{ color: '#d1d1d1' }}>
+                                {setting.title || 'N/A'}
+                            </span>
+                        </div>
+
+                        <div className="mb-3 col-6">
+                            <p style={{ fontSize: '17px', marginBottom: '5px' }}>
+                                Logo:
+                            </p>
+                            {setting.logo ? (
+                                <img
+                                    src={setting.logo}
+                                    alt="Logo"
+                                    style={{ borderRadius: '5px' }}
+                                />
+                            ) : (
+                                <p style={{ color: '#d1d1d1' }}>No Logo Available</p>
+                            )}
+                        </div>
+
+                        {Object.keys(colorLabels).map((colorKey ) => (
+                            <div key={colorKey} className="mb-3 ">
+                                <p style={{ fontSize: '17px', marginBottom: '5px' }}>
+                                    {colorLabels[colorKey]}:
+                                </p>
+                                <div
+                                    style={{
+                                        backgroundColor: setting[colorKey] || '#000000',  
+                                        border: '1px solid #6063af',
+                                        borderRadius: '5px',
+                                        width: '100%',
+                                        height: '30px',
+                                        cursor: 'not-allowed',
+                                        pointerEvents: 'none', 
+                                    }}
+                                    className="p-1 "
+                                />
+                            </div>
+                        ))}
+
+                    </div>
+                    <button type="button" style={{ backgroundColor: '#404380' }} className="btn text-white px-5 mt-2 me-3">
+                        <Link to={`/edit-setting/${setting.id}`} className="text-white">Edit</Link>
+                    </button>
+                </div>
+            ))}
+            {settingsList.length === 0 && (
+                <p style={{ color: 'white' }}>
+                    No settings available to display.
+                </p>
+            )}
         </div>
     );
 };

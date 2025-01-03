@@ -18,7 +18,7 @@ export const EditQuiz = () => {
   });
 console.log(quizData);
 
-  const [loading, setLoading] = useState(true);  // State to track loading
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,10 +27,10 @@ console.log(quizData);
         console.log(quiz.data);
           setQuizData(quiz.data)
        
-        setLoading(false);  // Set loading to false after data is fetched
+        setLoading(false);  
       } catch (error) {
         console.error('Error fetching quiz data:', error);
-        setLoading(false);  // Set loading to false even if there's an error
+        setLoading(false); 
       }
     };
 

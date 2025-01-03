@@ -1,32 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { addSetting } from '../Conf/Api';
+import { Link, useNavigate } from 'react-router';
+import ViewSetting from './ViewSetting';
 
 function Setting() {
-    const defaultColors = {
-        bgcolor: '#191a32',
-        loginbuttoncolor: 'green',
-        loginbuttonbordercolor: '#6063af',
-        cardcolor: '#26284c',
-        bordercolor: '#282a4f',
-        headingtextcolor: '#ffffff',
-        textcolor: '#8789c3',
-        titlebuttoncolor: '#FFD2A0',
-        correctanscolor: '#008000',
-        wronganscolor: '#FF0000'
-    };
+    const [colorSettings, setColorSettings] = useState({
+        bgcolor: '',
+        loginbuttoncolor: '',
+        loginbuttonbordercolor: '',
+        cardcolor: '',
+        bordercolor: '',
+        headingtextcolor: '',
+        textcolor: '',
+        titlebuttoncolor: '',
+        correctanscolor: '',
+        wronganscolor: ''
+    });
 
-    const [colorSettings, setColorSettings] = useState(defaultColors);
     const [title, setTitle] = useState("");
     const [image, setImage] = useState(null);
     const [lastSubmittedColors, setLastSubmittedColors] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [settingId, setSettingId] = useState(null);
 
-    // useEffect(() => {
-    //     // const savedColors = localStorage.getItem('lastSubmittedColors');
-    //     if (savedColors) {
-    //         setLastSubmittedColors(JSON.parse(savedColors));
-    //         setColorSettings(JSON.parse(savedColors));
-    //     }
-    // }, []);
+    const navigate = useNavigate();
 
     const handleColorChange = (event, colorKey) => {
         setColorSettings(prev => ({
@@ -38,7 +35,6 @@ function Setting() {
     const handleSubmit = async () => {
         const formData = new FormData();
 
-        // Add all color settings to formData
         formData.append('bgcolor', colorSettings.bgcolor);
         formData.append('loginbuttoncolor', colorSettings.loginbuttoncolor);
         formData.append('loginbuttonbordercolor', colorSettings.loginbuttonbordercolor);
@@ -58,13 +54,8 @@ function Setting() {
 
         try {
             const response = await addSetting(formData);
-            console.log('Setting added successfully:', response);
-
-            // Save submitted colors to localStorage
-            // localStorage.setItem('lastSubmittedColors', JSON.stringify(colorSettings));
             setLastSubmittedColors(colorSettings);
-
-            // Clear form fields except colors
+            setSettingId(response.data.id);
             setTitle("");
             setImage(null);
 
@@ -82,12 +73,11 @@ function Setting() {
         }
     };
 
-
     return (
         <div className='p-4'>
-            <h5 className="text-white mb-3">Setting Add</h5>
+            {/* <h5 className="text-white mb-3">Setting Add</h5> */}
 
-            <div className='col-12 px-4 py-2' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
+            {/* <div className='col-12 px-4 py-2' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
                 <p className='mb-2' style={{ fontSize: '17px' }}>Logo</p>
                 <input
                     className="form-control w-100 mb-3"
@@ -121,164 +111,50 @@ function Setting() {
             </div>
 
             <div className='col-12 px-4 py-2 d-flex flex-wrap' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
-                {/* {Object.keys(colorSettings).map((key, index) => ( */}
-                <div className="mb-4 w-100">
-                    <p className='mb-2' style={{ fontSize: '17px' }}>backgroundColor</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-3"
-                        type="color"
-                        value={colorSettings.bgcolor}
-                        onChange={(e) => handleColorChange(e, 'bgcolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                    <p className='mb-2' style={{ fontSize: '17px' }}>Login Button Color</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-3"
-                        type="color"
-                        value={colorSettings.loginbuttoncolor}
-                        onChange={(e) => handleColorChange(e, 'loginbuttoncolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                    <p className='mb-2' style={{ fontSize: '17px' }}>Login Button Border Color</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-3"
-                        type="color"
-                        value={colorSettings.loginbuttonbordercolor}
-                        onChange={(e) => handleColorChange(e, 'loginbuttonbordercolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                    <p className='mb-2' style={{ fontSize: '17px' }}>Card Color</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-3"
-                        type="color"
-                        value={colorSettings.cardcolor}
-                        onChange={(e) => handleColorChange(e, 'cardcolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                    <p className='mb-2' style={{ fontSize: '17px' }}>Border Color</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-3"
-                        type="color"
-                        value={colorSettings.bordercolor}
-                        onChange={(e) => handleColorChange(e, 'bordercolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                    <p className='mb-2' style={{ fontSize: '17px' }}> Title Button Color</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-3"
-                        type="color"
-                        value={colorSettings.titlebuttoncolor}
-                        onChange={(e) => handleColorChange(e, 'titlebuttoncolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                    <p className='mb-2' style={{ fontSize: '17px' }}> Heading Text Color</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-3"
-                        type="color"
-                        value={colorSettings.headingtextcolor}
-                        onChange={(e) => handleColorChange(e, 'headingtextcolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                    <p className='mb-2' style={{ fontSize: '17px' }}> Correct Button Color</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-3"
-                        type="color"
-                        value={colorSettings.correctanscolor}
-                        onChange={(e) => handleColorChange(e, 'correctanscolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                    <p className='mb-2' style={{ fontSize: '17px' }}> Wrong Button Color</p>
-                    <input
-                        className="form-control form-control-color w-100 mb-1"
-                        type="color"
-                        value={colorSettings.wronganscolor}
-                        onChange={(e) => handleColorChange(e, 'wronganscolor')}
-                        style={{
-                            border: '1px solid #6063af',
-                            backgroundColor: 'transparent',
-                            borderRadius: '5px',
-                            width: '100%',
-                            fontSize: '15px',
-                            color: 'white',
-                        }}
-                    />
-
-                </div>
-                {/* ))} */}
+                {Object.keys(colorSettings).map((key, index) => (
+                    <div className="mb-4 w-100" key={index}>
+                        <p className='mb-2' style={{ fontSize: '17px' }}>{key.replace(/([A-Z])/g, ' $1').toUpperCase()}</p>
+                        <input
+                            className="form-control form-control-color w-100 mb-3"
+                            type="color"
+                            value={colorSettings[key]}
+                            onChange={(e) => handleColorChange(e, key)}
+                            style={{
+                                border: '1px solid #6063af',
+                                backgroundColor: 'transparent',
+                                borderRadius: '5px',
+                                width: '100%',
+                                fontSize: '15px',
+                                color: 'white',
+                            }}
+                        />
+                    </div>
+                ))}
 
                 <button
                     type="button"
                     onClick={handleSubmit}
                     style={{ backgroundColor: '#404380' }}
+                    className="btn text-white px-5 mt-2 me-3"
+                >
+                    {isEditing ? 'Update' : 'Submit'}
+                </button>
+
+                <button
+                    type="button"
+                    style={{ backgroundColor: '#404380' }}
                     className="btn text-white px-5 mt-2"
                 >
-                    Submit
+                    <Link
+                        to={() => settingId && navigate(`/edit-setting/${settingId}`)}
+                        className="text-success me-3 fs-5"
+                    >
+                        Edit
+                    </Link>
                 </button>
-            </div>
+            </div> */}
+
+            <ViewSetting />
         </div>
     );
 }

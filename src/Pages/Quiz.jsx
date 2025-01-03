@@ -24,7 +24,6 @@ function Quiz() {
         setCategories([]); // Fallback to empty array in case of error
       }
     };
-
     fetchCategories();
   }, []);
 
@@ -55,7 +54,7 @@ function Quiz() {
       B: quizData.optionB,
       C: quizData.optionC,
       D: quizData.optionD,
-      answer: quizData.correctAnswer, 
+      answer: quizData.correctAnswer,
       categoryId: quizData.categoryId,
     };
 
@@ -231,7 +230,6 @@ function Quiz() {
           </select>
         </div>
 
-
         <div className='text-white col-12 mt-2'>
           <button
             type="button"
@@ -243,7 +241,7 @@ function Quiz() {
           </button>
         </div>
       </div>
-      <ViewQuiz />
+      {/* <ViewQuiz /> */}
     </div>
   );
 }

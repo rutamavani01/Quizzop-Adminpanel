@@ -3,17 +3,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getCategoryById, updateCategoryById } from '../Conf/Api';
 import Dropzone from 'react-dropzone';
 
-const Category_edit = () => {
+const CategoryEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const BASE_URL = 'http://192.168.1.8:8000';
 
     const [category, setCategory] = useState({
         title: '',
         description: '',
-        image: ''
+        image: '',
     });
-    const [selectedFile, setSelectedFile] = useState(null);
+
+    const [previewImage, setPreviewImage] = useState(''); // For image preview
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -25,8 +25,9 @@ const Category_edit = () => {
                     setCategory({
                         title: response.data.title || '',
                         description: response.data.description || '',
-                        image: response.data.image || ''
+                        image: response.data.image || '',
                     });
+                    setPreviewImage(response.data.image || ''); // Set initial preview
                 }
             } catch (err) {
                 setError('Failed to fetch category details.');
@@ -35,34 +36,22 @@ const Category_edit = () => {
                 setLoading(false);
             }
         };
-
         fetchCategory();
     }, [id]);
 
-    const handleFileDrop = (acceptedFiles) => {
-        if (acceptedFiles.length) {
-            const file = acceptedFiles[0];
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                const timestamp = new Date().getTime();
-                const randomNum = Math.floor(Math.random() * 1000000000);
-                const filename = `image-${timestamp}-${randomNum}.${file.name.split('.').pop()}`;
-                
-                setSelectedFile({
-                    file: file,
-                    base64: reader.result,
-                    filename: filename
-                });
-            };
-
-            reader.readAsDataURL(file);
+    const handleImageDrop = (acceptedFiles) => {
+        if (acceptedFiles && acceptedFiles[0]) {
+            const imageFile = acceptedFiles[0];
+            setCategory({
+                ...category,
+                image: imageFile, // Store the file for upload
+            });
+            setPreviewImage(URL.createObjectURL(imageFile)); // Show preview
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
             if (!category.title.trim()) {
                 alert('Please enter a category name.');
@@ -77,21 +66,18 @@ const Category_edit = () => {
             formData.append('title', category.title);
             formData.append('description', category.description);
 
-            if (selectedFile && selectedFile.file) {
-                const file = selectedFile.file;
-                const newFile = new File([file], selectedFile.filename, { type: file.type });
-                formData.append('image', newFile);
-            } else if (category.image) {
-                // Extract just the filename from the full path
-                const filename = category.image.split('/').pop();
-                formData.append('image', filename);
+            // Handle image: Add only if it's a new File, otherwise use the existing URL
+            if (category.image instanceof File) {
+                formData.append('image', category.image);
+            } else {
+                formData.append('image', category.image); // Pass existing URL as is
             }
 
             const response = await updateCategoryById(id, formData);
 
             if (response.success) {
-                navigate('/category');
                 alert('Category updated successfully!');
+                navigate('/category');
             } else {
                 throw new Error(response.message || 'Failed to update category');
             }
@@ -101,41 +87,29 @@ const Category_edit = () => {
         }
     };
 
-    const getImageSource = (imagePath) => {
-        if (!imagePath) return null;
-
-        // If it's a base64 image from new selection
-        if (selectedFile && selectedFile.base64) {
-            return selectedFile.base64;
-        }
-
-        // Extract filename from full path
-        let filename;
-        if (imagePath.includes('uploads')) {
-            // Split by 'uploads/' and get the last part
-            const parts = imagePath.split('uploads/');
-            filename = parts[parts.length - 1];
-            // Remove any remaining path segments
-            filename = filename.split(/[\\/]/).pop();
-        } else {
-            filename = imagePath.split(/[\\/]/).pop();
-        }
-
-        return `${BASE_URL}/uploads/${filename}`;
-    };
-
     if (loading) {
         return <div className="p-4 text-white">Loading category details...</div>;
+    }
+
+    if (error) {
+        return <div className="p-4 text-white">{error}</div>;
     }
 
     return (
         <div className="p-4">
             <h5 className="text-white mb-3">Edit Category</h5>
-
-            <div className="col-12 p-4" style={{ backgroundColor: "#191a32", color: "white", width: "100%", borderRadius: "5px" }}>
+            <div
+                className="col-12 p-4"
+                style={{
+                    backgroundColor: '#191a32',
+                    color: 'white',
+                    width: '100%',
+                    borderRadius: '5px',
+                }}
+            >
                 <div className="text-white">
-                    <p className="mb-2" style={{ fontSize: "17px" }}>Category Image</p>
-                    <Dropzone onDrop={handleFileDrop} accept="image/*">
+                    <p className="mb-2" style={{ fontSize: '17px' }}>Category Image</p>
+                    <Dropzone accept="image/*" onDrop={handleImageDrop}>
                         {({ getRootProps, getInputProps }) => (
                             <div {...getRootProps()} style={{
                                 border: "1px solid #6063af",
@@ -147,46 +121,76 @@ const Category_edit = () => {
                             }}>
                                 <input {...getInputProps()} />
                                 <div className="text-start">
-                                    {(selectedFile || category.image) ? (
+                                    {category.image instanceof File ? (
                                         <img
-                                            src={selectedFile ? selectedFile.base64 : getImageSource(category.image)}
-                                            alt="Category"
-                                            style={{ maxWidth: "70px", height: "auto", objectFit: "cover" }}
+                                            src={URL.createObjectURL(category.image)}
+                                            alt={category.title}
+                                            style={{
+                                                maxWidth: "70px",
+                                                height: "auto",
+                                                objectFit: "cover"
+                                            }}
                                         />
                                     ) : (
-                                        <p className="text-center">Drag and drop or click to select an image</p>
+                                        <img
+                                            src={category.image} // Use the URL directly for existing images
+                                            alt={category.title}
+                                            style={{
+                                                maxWidth: "70px",
+                                                height: "auto",
+                                                objectFit: "cover"
+                                            }}
+                                        />
                                     )}
                                 </div>
                             </div>
                         )}
                     </Dropzone>
+
                 </div>
 
                 <div className="text-white mt-4">
-                    <p className="mb-2" style={{ fontSize: "17px" }}>Category Name</p>
+                    <p className="mb-2" style={{ fontSize: '17px' }}>Category Name</p>
                     <input
                         type="text"
-                        className="py-2"
-                        style={{ border: "1px solid #6063af", backgroundColor: "transparent", borderRadius: "5px", width: "100%", fontSize: "15px", color: "white" }}
+                        className="form-control py-2"
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                        }}
                         value={category.title}
                         onChange={(e) => setCategory({ ...category, title: e.target.value })}
+                        placeholder="Enter category name"
                     />
                 </div>
 
                 <div className="text-white mt-4">
-                    <p className="mb-2" style={{ fontSize: "17px" }}>Category Description</p>
+                    <p className="mb-2" style={{ fontSize: '17px' }}>Category Description</p>
                     <textarea
-                        className="py-2"
-                        style={{ border: "1px solid #6063af", backgroundColor: "transparent", borderRadius: "5px", width: "100%", fontSize: "15px", color: "white" }}
+                        className="form-control py-2"
+                        style={{
+                            border: '1px solid #6063af',
+                            backgroundColor: 'transparent',
+                            borderRadius: '5px',
+                            width: '100%',
+                            fontSize: '15px',
+                            color: 'white',
+                            minHeight: '100px',
+                        }}
                         value={category.description}
                         onChange={(e) => setCategory({ ...category, description: e.target.value })}
+                        placeholder="Enter category description"
                     />
                 </div>
 
                 <div className="mt-4">
                     <button
                         type="button"
-                        style={{ backgroundColor: "#404380" }}
+                        style={{ backgroundColor: '#404380' }}
                         className="btn text-white px-5 waves-effect waves-light text-center d-flex justify-content-start mt-3"
                         onClick={handleSubmit}
                     >
@@ -198,4 +202,4 @@ const Category_edit = () => {
     );
 };
 
-export default Category_edit;
+export default CategoryEdit;

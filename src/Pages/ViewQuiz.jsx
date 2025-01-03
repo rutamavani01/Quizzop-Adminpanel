@@ -5,7 +5,7 @@ import { getQuizzes, deleteQuiz, getCategoriesDrodown } from '../Conf/Api';
 const ViewQuiz = () => {
     const [quizzes, setQuizzes] = useState([]);
     // console.log(quizzes);
-    
+
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
@@ -45,7 +45,8 @@ const ViewQuiz = () => {
     };
 
     return (
-        <div className="mt-5 p-3" style={{ backgroundColor: '#191a32' }}>
+        <div className="mt-5 p-3" >
+            <div className='col-12 px-4 py-2' style={{ backgroundColor: '#191a32', color: 'white', width: '100%', borderRadius: '5px' }}>
             {quizzes.length > 0 ? (
                 <table
                     className="table text-center"
@@ -113,6 +114,7 @@ const ViewQuiz = () => {
                 <p className="text-white">No quizzes available.</p>
             )}
         </div>
+        </div >
     );
 };
 
